@@ -6,7 +6,11 @@ import os
 import zipfile
 
 #set the directory you want to unzip files from
-os.chdir("/Volumes/Video/Google Takeout2023")
+#os.chdir("/Volumes/Video/Google Takeout2023")
+
+#set the directory to current
+os.chdir("./input")
+
 
 for file in os.listdir():
     if file.endswith(".zip"):
