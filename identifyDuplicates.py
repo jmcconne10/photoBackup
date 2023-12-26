@@ -30,29 +30,31 @@ def hash_duplicates(duplicate_files):
     hashed_files = {}
             
     for key, value_list in duplicate_files.items():
-        print(f"Items for key '{key}':")
     
     # Iterate through each item in the list
         for item in value_list:
             # Hash the file
             hash_value = hash_file(item)
-            print(f"Hash value for {item}: {hash_value}")
-
-
+            dictionary_item = {'location': item, 'hash': hash_value}
             # Add the hash value to the dictionary
             if key in hashed_files:
-                hashed_files[key].append(item)
-                hashed_files[key].append(hash_value)
+                hashed_files[key].append(dictionary_item)
             else:
-                hashed_files[key] = [item]
-                hashed_files[key].append(hash_value)
+                hashed_files[key] = [dictionary_item]
     return hashed_files
-
-            
 
 def hash_file(file_path):
     with open(file_path, 'rb') as f:
         return hashlib.md5(f.read()).hexdigest()
+    
+def check_duplicate_hash(hashed_files):
+    for filename, records in hashed_files.items():
+        print(f"File: {filename}")
+
+        # Iterate through the list of records for each file
+        for record in records:
+            print(f"  Location: {record['location']}, Hash: {record['hash']}")
+
 
 # Specify the root folder
 root_folder = 'test'
@@ -66,6 +68,7 @@ duplicate_files = identify_duplicate_files(all_files_list)
 
 # Write the output to a CSV file
 write_to_csv(duplicate_files, output_csv)
-print(f"Duplicate file information written to {output_csv}.")
 
-print(hash_duplicates(duplicate_files))
+hashed_files = hash_duplicates(duplicate_files)
+#print(hashed_files)
+check_duplicate_hash(hashed_files)
