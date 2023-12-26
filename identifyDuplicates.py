@@ -52,8 +52,15 @@ def check_duplicate_hash(hashed_files):
         print(f"File: {filename}")
 
         # Iterate through the list of records for each file
-        for record in records:
-            print(f"  Location: {record['location']}, Hash: {record['hash']}")
+        for i in range(len(records) - 1):
+            hash1 = records[i]['hash']
+            hash2 = records[i + 1]['hash']
+            
+            # Compare hash values
+            if hash1 == hash2:
+                print(f"  Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
+            else:
+                print(f"  Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
 
 
 # Specify the root folder
