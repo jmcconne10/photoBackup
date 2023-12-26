@@ -7,7 +7,12 @@ from collections import defaultdict
 import os
 
 def get_all_files(root_folder):
-    return [os.path.join(foldername, filename) for foldername, _, filenames in os.walk(root_folder) for filename in filenames]
+    return [
+        os.path.join(foldername, filename)
+        for foldername, _, filenames in os.walk(root_folder)
+        for filename in filenames
+        if filename != ".DS_Store"
+    ]
 
 def identify_duplicate_files(file_list):
     file_locations = defaultdict(list)
