@@ -1,3 +1,7 @@
+## TO DO:
+# Need to add a try and except for creating the hash value
+# Need to figure out how to manage files in /Volumes/Video/iMove Library External 2.imovielibrary
+
 # Specify the root folder
 #root_folder = '/Volumes/Video/takeOutoutput'
 import hashlib
@@ -5,13 +9,17 @@ import os
 import csv
 from collections import defaultdict
 import os
+import time
 
-def get_all_files(root_folder):
+def get_all_files(root_folder, exclude_names=None, exclude_extensions=None):
+    exclude_names = exclude_names or []
+    exclude_extensions = exclude_extensions or []
+    
     return [
         os.path.join(foldername, filename)
         for foldername, _, filenames in os.walk(root_folder)
         for filename in filenames
-        if filename != ".DS_Store"
+        if filename not in exclude_names and not filename.endswith(tuple(exclude_extensions))
     ]
 
 def identify_duplicate_files(file_list):
@@ -50,7 +58,14 @@ def hash_duplicates(duplicate_files):
 
 def hash_file(file_path):
     with open(file_path, 'rb') as f:
-        return hashlib.md5(f.read()).hexdigest()
+
+        # Try to create a hash object
+        try:
+            hash_object = hashlib.md5(f.read()).hexdigest()
+        except ValueError:
+            hash_object = None
+
+    return hash_object
     
 def check_duplicate_hash(hashed_files):
     for filename, records in hashed_files.items():
@@ -68,12 +83,18 @@ def check_duplicate_hash(hashed_files):
                 print(f"  Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
 
 
-# Specify the root folder
-root_folder = 'test'
+# Record start time
+start_time = time.time()
+
+# Specify the output file
 output_csv = 'output/duplicate_files.csv'
 
-# Get a list of all files in subfolders
-all_files_list = get_all_files(root_folder)
+# Identifies root folder and gets a list of all files
+root_directory = 'test'
+#root_directory = "/Volumes/Video/Disney 2016"
+exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
+exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary']  # Add any file extensions you want to exclude
+all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
 
 # Identify duplicate file names and their locations
 duplicate_files = identify_duplicate_files(all_files_list)
@@ -84,3 +105,12 @@ write_to_csv(duplicate_files, output_csv)
 hashed_files = hash_duplicates(duplicate_files)
 #print(hashed_files)
 check_duplicate_hash(hashed_files)
+
+# Record end time
+end_time = time.time()
+
+# Calculate elapsed time
+elapsed_time = end_time - start_time
+
+# Print the elapsed time
+print(f"Elapsed Time: {elapsed_time} seconds")
