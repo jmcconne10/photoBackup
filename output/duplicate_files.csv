@@ -1,6 +1,5 @@
 File Name,Locations
-.DS_Store,"test/.DS_Store, test/sub1/.DS_Store, test/sub2/.DS_Store, test/sub2/sub2a/.DS_Store, test/sub3/.DS_Store"
 file1.txt,"test/sub1/file1.txt, test/sub2/sub2a/file1.txt"
 file6.txt,"test/sub1/file6.txt, test/sub2/sub2b/file6.txt"
 file7.txt,"test/sub2/sub2b/file7.txt, test/sub3/sub3a/file7.txt"
-file9.txt,"test/sub3/sub3b/file9.txt, test/sub3/sub3c/file9.txt"
+file9.txt,"test/sub3/sub3b/file9.txt, test/sub3/sub3c/file9.txt, test/sub3/sub3a/file9.txt"

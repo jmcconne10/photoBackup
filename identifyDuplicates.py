@@ -1,6 +1,6 @@
 ## TO DO:
-# Need to add a try and except for creating the hash value
-# Need to figure out how to manage files in /Volumes/Video/iMove Library External 2.imovielibrary
+# Configure logging at the start to show a start time and a number of files found
+# Configure logging throughout that shows every 10% done
 
 # Specify the root folder
 #root_folder = '/Volumes/Video/takeOutoutput'
@@ -14,8 +14,8 @@ import datetime
 import logging
 
 # Identifies root folder and gets a list of all files
-#root_directory = 'test'
-root_directory = "/Volumes/Video"
+root_directory = 'test'
+#root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
@@ -131,6 +131,8 @@ all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions
 
 # Identify duplicate file names and their locations
 duplicate_files = identify_duplicate_files(all_files_list)
+
+print(duplicate_files)
 
 # Write the output to a CSV file
 write_to_csv(duplicate_files, output_csv)

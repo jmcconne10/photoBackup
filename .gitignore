@@ -2,3 +2,4 @@ output/
 .DS_Store
 temp
 temp2
+*.log
