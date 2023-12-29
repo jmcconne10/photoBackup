@@ -10,6 +10,14 @@ import csv
 from collections import defaultdict
 import os
 import time
+import datetime
+import logging
+
+# Identifies root folder and gets a list of all files
+#root_directory = 'test'
+root_directory = "/Volumes/Video"
+exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
+exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
 def get_all_files(root_folder, exclude_names=None, exclude_extensions=None):
     exclude_names = exclude_names or []
@@ -62,15 +70,19 @@ def hash_file(file_path):
         # Try to create a hash object
         try:
             hash_object = hashlib.md5(f.read()).hexdigest()
+            logger.debug("File hashed successfully: %s", file_path)
         except ValueError:
             hash_object = None
+            logger.error("There was an error hashing the file: %s", file_path)
 
     return hash_object
     
 def check_duplicate_hash(hashed_files):
-    for filename, records in hashed_files.items():
-        print(f"File: {filename}")
 
+    duplicateCount = 0
+    mismatchCount = 0
+
+    for filename, records in hashed_files.items():
         # Iterate through the list of records for each file
         for i in range(len(records) - 1):
             hash1 = records[i]['hash']
@@ -78,22 +90,43 @@ def check_duplicate_hash(hashed_files):
             
             # Compare hash values
             if hash1 == hash2:
-                print(f"  Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                logger.info(f"Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                duplicateCount += 1
             else:
-                print(f"  Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                logger.info(f"Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                mismatchCount += 1
+    
+    return duplicateCount, mismatchCount
 
+# Get the current date and time
+current_date = datetime.datetime.now()
+
+# Format the date as a string (e.g., '2023-03-15')
+formatted_date = current_date.strftime('%Y-%m-%d')
+
+# Specify a file for logging that includes current date
+logFile=(f'output/log_{formatted_date}.log')
+
+# Configure the logging system
+logging.basicConfig(filename=logFile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Create a logger
+logger = logging.getLogger('my_logger')
 
 # Record start time
 start_time = time.time()
 
+# Start the logging
+logger.info("**************************************************************")
+logger.info("Duplicate Identification Started")
+logger.info("Root Directory: %s", root_directory)
+logger.info("Exclude Files: %s", exclude_files)
+logger.info("Exclude Extensions: %s", exclude_extensions)
+logger.info("**************************************************************")
+
 # Specify the output file
 output_csv = 'output/duplicate_files.csv'
 
-# Identifies root folder and gets a list of all files
-root_directory = 'test'
-#root_directory = "/Volumes/Video/Disney 2016"
-exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
-exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary']  # Add any file extensions you want to exclude
 all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
 
 # Identify duplicate file names and their locations
@@ -103,8 +136,8 @@ duplicate_files = identify_duplicate_files(all_files_list)
 write_to_csv(duplicate_files, output_csv)
 
 hashed_files = hash_duplicates(duplicate_files)
-#print(hashed_files)
-check_duplicate_hash(hashed_files)
+
+duplicateCount, mismatchCount = check_duplicate_hash(hashed_files)
 
 # Record end time
 end_time = time.time()
@@ -114,3 +147,14 @@ elapsed_time = end_time - start_time
 
 # Print the elapsed time
 print(f"Elapsed Time: {elapsed_time} seconds")
+
+
+#use logger to track how many duplicates were found and how long it took
+logger.info("**************************************************************")
+logger.info("Duplicate Identification Completed")
+logger.info("Total Number of Files Found: %s", len(all_files_list))
+logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
+logger.info("Number of Duplicate Hash Values Found: %s", duplicateCount)
+logger.info("Number of Mismatched Hash Values Found: %s", mismatchCount)
+logger.info("Elapsed Time: %s seconds", elapsed_time)
+logger.info("**************************************************************")
