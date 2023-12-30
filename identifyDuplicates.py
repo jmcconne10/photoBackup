@@ -27,8 +27,9 @@ import logging
 import pprint
 
 # Identifies root folder and gets a list of all files
-#root_directory = 'test'
-root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
+log_Level = "INFO"
+root_directory = 'test'
+#root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -142,7 +143,7 @@ logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(me
 
 # Create a logger and sets 
 logger = logging.getLogger('my_logger')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(log_Level)
 
 # Record start time
 start_time = time.time()
