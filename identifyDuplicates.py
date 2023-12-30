@@ -2,20 +2,7 @@
 # Add a method to get the file size, so I can ignore smaller files
 # Configure logging throughout that shows every 10% done
 
-"""
-Traceback (most recent call last):
-  File "/Users/Joe/OneDrive/Code/photoBackup/identifyDuplicates.py", line 149, in <module>
-    hashed_files = hash_duplicates(duplicate_files)
-  File "/Users/Joe/OneDrive/Code/photoBackup/identifyDuplicates.py", line 54, in hash_duplicates
-    hash_value = hash_file(item)
-  File "/Users/Joe/OneDrive/Code/photoBackup/identifyDuplicates.py", line 64, in hash_file
-    with open(file_path, 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/Video/iMovie Library External 2.imovielibrary/Snowboarding 2017/Original Media/GOPR8756 copy.jpg'
 
-"""
-
-# Specify the root folder
-#root_folder = '/Volumes/Video/takeOutoutput'
 import hashlib
 import os
 import csv
@@ -26,15 +13,16 @@ import datetime
 import logging
 import pprint
 
+## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "INFO"
-root_directory = 'test'
-#root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
+#root_directory = 'test'
+root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
-# Specify the output files
+# Specify the output file
 hash_csv = 'output/duplicate_file_hashes.csv'
 
 def get_all_files(root_folder, exclude_names=None, exclude_extensions=None):
@@ -58,6 +46,8 @@ def identify_duplicate_files(file_list):
 
 def hash_duplicates(duplicate_files):
 
+    total_count = len(duplicate_files)
+    current_count = 0
     hashed_files = {}
             
     for key, value_list in duplicate_files.items():
@@ -72,9 +62,15 @@ def hash_duplicates(duplicate_files):
                 hashed_files[key].append(dictionary_item)
             else:
                 hashed_files[key] = [dictionary_item]
+
+        # Update the progress
+        current_count += 1
+        progress = current_count / total_count * 100
+        print(f"Progress: {progress:.2f}%")
     return hashed_files
 
 def hash_file(file_path):
+
     try:
         with open(file_path, 'rb') as f:
             # Try to create a hash object
@@ -90,6 +86,7 @@ def hash_file(file_path):
     except Exception as e:
         hash_object = None
         logger.error("An unexpected error occurred: %s", str(e))
+    
 
     return hash_object
     
@@ -166,6 +163,7 @@ duplicate_files = identify_duplicate_files(all_files_list)
 
 logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 
+# Hashes the files, stores the results in a dictionary, and keeps track of % completed
 hashed_files = hash_duplicates(duplicate_files)
 
 duplicateCount, mismatchCount = check_duplicate_hash(hashed_files)
