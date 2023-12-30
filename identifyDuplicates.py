@@ -1,6 +1,18 @@
 ## TO DO:
-# Configure logging at the start to show a start time and a number of files found
+# Add a method to get the file size, so I can ignore smaller files
 # Configure logging throughout that shows every 10% done
+
+"""
+Traceback (most recent call last):
+  File "/Users/Joe/OneDrive/Code/photoBackup/identifyDuplicates.py", line 149, in <module>
+    hashed_files = hash_duplicates(duplicate_files)
+  File "/Users/Joe/OneDrive/Code/photoBackup/identifyDuplicates.py", line 54, in hash_duplicates
+    hash_value = hash_file(item)
+  File "/Users/Joe/OneDrive/Code/photoBackup/identifyDuplicates.py", line 64, in hash_file
+    with open(file_path, 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/Video/iMovie Library External 2.imovielibrary/Snowboarding 2017/Original Media/GOPR8756 copy.jpg'
+
+"""
 
 # Specify the root folder
 #root_folder = '/Volumes/Video/takeOutoutput'
@@ -15,7 +27,8 @@ import logging
 import pprint
 
 # Identifies root folder and gets a list of all files
-root_directory = 'test'
+#root_directory = 'test'
+root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -61,15 +74,21 @@ def hash_duplicates(duplicate_files):
     return hashed_files
 
 def hash_file(file_path):
-    with open(file_path, 'rb') as f:
-
-        # Try to create a hash object
-        try:
-            hash_object = hashlib.md5(f.read()).hexdigest()
-            logger.debug("File hashed successfully: %s", file_path)
-        except ValueError:
-            hash_object = None
-            logger.error("There was an error hashing the file: %s", file_path)
+    try:
+        with open(file_path, 'rb') as f:
+            # Try to create a hash object
+            try:
+                hash_object = hashlib.md5(f.read()).hexdigest()
+                logger.debug("File hashed successfully: %s", file_path)
+            except ValueError:
+                hash_object = None
+                logger.error("There was an error hashing the file: %s", file_path)
+    except FileNotFoundError:
+        hash_object = None
+        logger.error("File not found: %s", file_path)
+    except Exception as e:
+        hash_object = None
+        logger.error("An unexpected error occurred: %s", str(e))
 
     return hash_object
     
@@ -150,7 +169,7 @@ hashed_files = hash_duplicates(duplicate_files)
 
 duplicateCount, mismatchCount = check_duplicate_hash(hashed_files)
 
-pprint.pprint(hashed_files)
+#pprint.pprint(hashed_files)
 
 # Write the output showing which duplicate file names have the same has
 write_duplicate_files(hashed_files, hash_csv)
