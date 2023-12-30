@@ -90,10 +90,10 @@ def check_duplicate_hash(hashed_files):
             
             # Compare hash values
             if hash1 == hash2:
-                logger.info(f"Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                logger.debug(f"Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
                 duplicateCount += 1
             else:
-                logger.info(f"Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                logger.debug(f"Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
                 mismatchCount += 1
     
     return duplicateCount, mismatchCount
@@ -108,10 +108,11 @@ formatted_date = current_date.strftime('%Y-%m-%d')
 logFile=(f'output/log_{formatted_date}.log')
 
 # Configure the logging system
-logging.basicConfig(filename=logFile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Create a logger
 logger = logging.getLogger('my_logger')
+logger.setLevel(logging.INFO)
 
 # Record start time
 start_time = time.time()
@@ -127,12 +128,15 @@ logger.info("**************************************************************")
 # Specify the output file
 output_csv = 'output/duplicate_files.csv'
 
+# Get a list of all files in the root directory
 all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
+
+logger.info("Total Number of Files Found: %s", len(all_files_list))
 
 # Identify duplicate file names and their locations
 duplicate_files = identify_duplicate_files(all_files_list)
 
-print(duplicate_files)
+logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 
 # Write the output to a CSV file
 write_to_csv(duplicate_files, output_csv)
