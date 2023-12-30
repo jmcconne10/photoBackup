@@ -110,7 +110,7 @@ logFile=(f'output/log_{formatted_date}.log')
 # Configure the logging system
 logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Create a logger
+# Create a logger and sets 
 logger = logging.getLogger('my_logger')
 logger.setLevel(logging.INFO)
 
