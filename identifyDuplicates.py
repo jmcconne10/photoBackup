@@ -12,12 +12,16 @@ import os
 import time
 import datetime
 import logging
+import pprint
 
 # Identifies root folder and gets a list of all files
 root_directory = 'test'
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
+
+# Specify the output files
+hash_csv = 'output/duplicate_file_hashes.csv'
 
 def get_all_files(root_folder, exclude_names=None, exclude_extensions=None):
     exclude_names = exclude_names or []
@@ -37,14 +41,6 @@ def identify_duplicate_files(file_list):
         file_locations[file_name].append(file_path)
     duplicate_files = {name: locations for name, locations in file_locations.items() if len(locations) > 1}
     return duplicate_files
-
-def write_to_csv(duplicate_files, output_csv):
-    with open(output_csv, 'w', newline='') as csvfile:
-        fieldnames = ['File Name', 'Locations']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for file_name, locations in duplicate_files.items():
-            writer.writerow({'File Name': file_name, 'Locations': ', '.join(locations)})
 
 def hash_duplicates(duplicate_files):
 
@@ -91,12 +87,27 @@ def check_duplicate_hash(hashed_files):
             # Compare hash values
             if hash1 == hash2:
                 logger.debug(f"Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                records[i]['Duplicate'] = True
+                records[i + 1]['Duplicate'] = True
                 duplicateCount += 1
             else:
                 logger.debug(f"Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                records[i]['Duplicate'] = False
+                records[i + 1]['Duplicate'] = False
                 mismatchCount += 1
     
     return duplicateCount, mismatchCount
+
+def write_duplicate_files(data, csv_file_path):
+    with open(csv_file_path, 'w', newline='') as csv_file:
+        fieldnames = ['filename', 'location', 'hash']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for filename, entries in data.items():
+            for entry in entries:
+                writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash']})
+
 
 # Get the current date and time
 current_date = datetime.datetime.now()
@@ -112,7 +123,7 @@ logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(me
 
 # Create a logger and sets 
 logger = logging.getLogger('my_logger')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Record start time
 start_time = time.time()
@@ -125,9 +136,6 @@ logger.info("Exclude Files: %s", exclude_files)
 logger.info("Exclude Extensions: %s", exclude_extensions)
 logger.info("**************************************************************")
 
-# Specify the output file
-output_csv = 'output/duplicate_files.csv'
-
 # Get a list of all files in the root directory
 all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
 
@@ -138,12 +146,14 @@ duplicate_files = identify_duplicate_files(all_files_list)
 
 logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 
-# Write the output to a CSV file
-write_to_csv(duplicate_files, output_csv)
-
 hashed_files = hash_duplicates(duplicate_files)
 
 duplicateCount, mismatchCount = check_duplicate_hash(hashed_files)
+
+pprint.pprint(hashed_files)
+
+# Write the output showing which duplicate file names have the same has
+write_duplicate_files(hashed_files, hash_csv)
 
 # Record end time
 end_time = time.time()
