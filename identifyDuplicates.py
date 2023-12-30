@@ -100,13 +100,13 @@ def check_duplicate_hash(hashed_files):
 
 def write_duplicate_files(data, csv_file_path):
     with open(csv_file_path, 'w', newline='') as csv_file:
-        fieldnames = ['filename', 'location', 'hash']
+        fieldnames = ['filename', 'location', 'hash', 'Duplicate']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
         for filename, entries in data.items():
             for entry in entries:
-                writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash']})
+                writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate']})
 
 
 # Get the current date and time
