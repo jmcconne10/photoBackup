@@ -17,8 +17,8 @@ import pprint
 # Identifies root folder and gets a list of all files
 log_Level = "INFO"
 #root_directory = 'test'
-root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
-#root_directory = "/Volumes/Video"
+#root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
+root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
@@ -47,7 +47,7 @@ def identify_duplicate_files(file_list):
 def hash_duplicates(duplicate_files):
 
     total_count = len(duplicate_files)
-    progress_increment = total_count // 10  # 10% increments
+    progress_increment = total_count // 20  # 10% increments
     current_count = 0
     hashed_files = {}
             
