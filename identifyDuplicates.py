@@ -47,6 +47,7 @@ def identify_duplicate_files(file_list):
 def hash_duplicates(duplicate_files):
 
     total_count = len(duplicate_files)
+    progress_increment = total_count // 10  # 10% increments
     current_count = 0
     hashed_files = {}
             
@@ -65,8 +66,9 @@ def hash_duplicates(duplicate_files):
 
         # Update the progress
         current_count += 1
-        progress = current_count / total_count * 100
-        print(f"Progress: {progress:.2f}%")
+        if (current_count % progress_increment == 0) or (current_count / total_count == 1):
+            percentage_completion = (current_count / total_count) * 100
+            print(f"Progress: {percentage_completion:.0f}%")
     return hashed_files
 
 def hash_file(file_path):
