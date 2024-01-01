@@ -1,6 +1,6 @@
 ## TO DO:
 # Add a method to get the file size, so I can ignore smaller files
-# Configure logging throughout that shows every 10% done
+# In this one, I'm trying to get it to have a CSV with only the files that are duplicates
 
 
 import hashlib
@@ -15,10 +15,10 @@ import pprint
 
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
-log_Level = "INFO"
-#root_directory = 'test'
+log_Level = "DEBUG"
+root_directory = 'test'
 #root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
-root_directory = "/Volumes/Video"
+#root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
@@ -47,7 +47,7 @@ def identify_duplicate_files(file_list):
 def hash_duplicates(duplicate_files):
 
     total_count = len(duplicate_files)
-    progress_increment = total_count // 20  # 10% increments
+    progress_increment = total_count // 1  # 10% increments
     current_count = 0
     hashed_files = {}
             
@@ -125,7 +125,8 @@ def write_duplicate_files(data, csv_file_path):
 
         for filename, entries in data.items():
             for entry in entries:
-                writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate']})
+                if (entry['Duplicate'] == True):
+                    writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate']})
 
 
 # Get the current date and time
