@@ -15,10 +15,10 @@ import pprint
 
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
-log_Level = "DEBUG"
-root_directory = 'test'
-#root_directory = "/Volumes/Video/iMovie Library External 2.imovielibrary"
-#root_directory = "/Volumes/Video"
+log_Level = "INFO"
+#root_directory = 'test'
+#root_directory = "/Volumes/Video/Jeremy Bachelor Party"
+root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
@@ -47,7 +47,7 @@ def identify_duplicate_files(file_list):
 def hash_duplicates(duplicate_files):
 
     total_count = len(duplicate_files)
-    progress_increment = total_count // 1  # 10% increments
+    progress_increment = total_count // 100  # 10% increments
     current_count = 0
     hashed_files = {}
             
@@ -117,16 +117,25 @@ def check_duplicate_hash(hashed_files):
     
     return duplicateCount, mismatchCount
 
+def get_file_size(hashed_files):
+    for filename, entries in hashed_files.items():
+        for entry in entries:
+            if (entry['Duplicate'] == True):
+                bytes = os.path.getsize(entry['location'])
+                # Convert bytes to megabytes and format to 2 decimal places
+                mb = round(bytes / (1024 * 1024), 2)
+                entry['size'] = mb
+
 def write_duplicate_files(data, csv_file_path):
     with open(csv_file_path, 'w', newline='') as csv_file:
-        fieldnames = ['filename', 'location', 'hash', 'Duplicate']
+        fieldnames = ['filename', 'location', 'hash', 'Duplicate', 'size']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
         for filename, entries in data.items():
             for entry in entries:
                 if (entry['Duplicate'] == True):
-                    writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate']})
+                    writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate'], 'size': entry['size']})
 
 
 # Get the current date and time
@@ -168,8 +177,10 @@ logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 
 # Hashes the files, stores the results in a dictionary, and keeps track of % completed
 hashed_files = hash_duplicates(duplicate_files)
-
 duplicateCount, mismatchCount = check_duplicate_hash(hashed_files)
+
+# Get the size of the files
+get_file_size(hashed_files)
 
 #pprint.pprint(hashed_files)
 
