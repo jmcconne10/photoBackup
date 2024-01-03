@@ -1,6 +1,7 @@
 ## TO DO:
 # Add a method to get the file size, so I can ignore smaller files
-# In this one, I'm trying to get it to have a CSV with only the files that are duplicates
+# In this one, I want to have the folder names in the csv file
+# Need to remove files that include iMovie
 
 
 import hashlib
@@ -15,10 +16,10 @@ import pprint
 
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
-log_Level = "INFO"
-#root_directory = 'test'
-#root_directory = "/Volumes/Video/Jeremy Bachelor Party"
-root_directory = "/Volumes/Video"
+log_Level = "INFO" # DEBUG is everything, INFO is less
+#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+root_directory = "/Volumes/Video/Google Takeout"
+#root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
 
@@ -96,46 +97,77 @@ def check_duplicate_hash(hashed_files):
 
     duplicateCount = 0
     mismatchCount = 0
+    deletedFiles = 0
 
     for filename, records in hashed_files.items():
         # Iterate through the list of records for each file
         for i in range(len(records) - 1):
-            hash1 = records[i]['hash']
-            hash2 = records[i + 1]['hash']
+
+            file1 = records[i]
+            file2 = records[i + 1]
+            hash1 = file1['hash']
+            hash2 = file2['hash']
             
             # Compare hash values
             if hash1 == hash2:
-                logger.debug(f"Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
-                records[i]['Duplicate'] = True
-                records[i + 1]['Duplicate'] = True
-                duplicateCount += 1
+                logger.debug(f"Hash values match for locations {file1['location']} and {file2['location']}")
+                file1['Duplicate'] = True
+                file2['Duplicate'] = True
+                duplicateCount += 1             
+               
+                # Check which file is in the main folder and delete the other
+                if file1['location'].startswith('/Volumes/Video/Google Takeout/Takeout/'):
+                    file1['Plan'] = 'Keep'
+                    file2['Plan'] = 'Delete'
+                    # Delete the file in location not main Takeout
+                    os.remove(file2['location'])
+                    logger.info("File deleted: %s", file2['location'])
+                    deletedFiles += 1
+                elif file2['location'].startswith('/Volumes/Video/Google Takeout/Takeout/'):
+                    file1['Plan'] = 'Delete'
+                    file2['Plan'] = 'Keep'
+                    # Delete the file in location not main Takeout
+                    os.remove(file1['location'])
+                    logger.info("File deleted: %s", file1['location'])
+                    deletedFiles += 1
+                else:
+                    # if plan attribute doesn't exist, mark it as left alone, it will be updated later if it is deleted
+
+                    if 'Plan' not in file1:
+                        file1['Plan'] = 'Left Alone'            
+                    if 'Plan' not in file2:
+                        file2['Plan'] = 'Left Alone' 
+
             else:
-                logger.debug(f"Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
-                records[i]['Duplicate'] = False
-                records[i + 1]['Duplicate'] = False
+                logger.debug(f"Hash values do not match for locations {file1['location']} and {file2['location']}")
+                file1['Duplicate'] = False
+                file2['Duplicate'] = False
                 mismatchCount += 1
     
-    return duplicateCount, mismatchCount
+    return duplicateCount, mismatchCount, deletedFiles
 
 def get_file_size(hashed_files):
     for filename, entries in hashed_files.items():
         for entry in entries:
             if (entry['Duplicate'] == True):
-                bytes = os.path.getsize(entry['location'])
-                # Convert bytes to megabytes and format to 2 decimal places
-                mb = round(bytes / (1024 * 1024), 2)
-                entry['size'] = mb
+                try:
+                    bytes = os.path.getsize(entry['location'])
+                    # Convert bytes to megabytes and format to 2 decimal places
+                    mb = round(bytes / (1024 * 1024), 2)
+                    entry['size'] = mb
+                except FileNotFoundError:
+                    entry['size'] = 'File not found'
 
 def write_duplicate_files(data, csv_file_path):
     with open(csv_file_path, 'w', newline='') as csv_file:
-        fieldnames = ['filename', 'location', 'hash', 'Duplicate', 'size']
+        fieldnames = ['filename', 'location', 'hash', 'Duplicate', 'size', 'Plan']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
         for filename, entries in data.items():
             for entry in entries:
                 if (entry['Duplicate'] == True):
-                    writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate'], 'size': entry['size']})
+                    writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate'], 'size': entry['size'], 'Plan': entry['Plan']})
 
 
 # Get the current date and time
@@ -177,7 +209,7 @@ logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 
 # Hashes the files, stores the results in a dictionary, and keeps track of % completed
 hashed_files = hash_duplicates(duplicate_files)
-duplicateCount, mismatchCount = check_duplicate_hash(hashed_files)
+duplicateCount, mismatchCount, deletedFiles = check_duplicate_hash(hashed_files)
 
 # Get the size of the files
 get_file_size(hashed_files)
@@ -192,10 +224,16 @@ end_time = time.time()
 
 # Calculate elapsed time
 elapsed_time = end_time - start_time
+hours = elapsed_time // 3600
+minutes = (elapsed_time % 3600) // 60
+seconds = (elapsed_time % 60)
+
+formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
+print(formatted_time)
 
 # Print the elapsed time
 print(f"Elapsed Time: {elapsed_time} seconds")
-
+print(f"Elapsed Time: {formatted_time}")
 
 #use logger to track how many duplicates were found and how long it took
 logger.info("**************************************************************")
@@ -203,6 +241,8 @@ logger.info("Duplicate Identification Completed")
 logger.info("Total Number of Files Found: %s", len(all_files_list))
 logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 logger.info("Number of Duplicate Hash Values Found: %s", duplicateCount)
+logger.info("Number of Deleted Files: %s", deletedFiles)
 logger.info("Number of Mismatched Hash Values Found: %s", mismatchCount)
 logger.info("Elapsed Time: %s seconds", elapsed_time)
+logger.info("Elapsed Time: %s seconds", formatted_time)
 logger.info("**************************************************************")
