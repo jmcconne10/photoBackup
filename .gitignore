@@ -3,3 +3,6 @@ output/
 temp
 temp2
 *.log
+.DS_Store
+googleTest/
+
