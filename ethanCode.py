@@ -1,3 +1,10 @@
+## To Do
+## Add logging capability to the remaining functions
+## Ensure is_accessbile does what it needs to
+## Review the exclude_extensions capability
+## Add in the method to track % complete
+
+
 import hashlib
 import os
 import csv
@@ -30,7 +37,9 @@ def is_accessible(folder_path: str) -> bool:
 
     try:
         os.access(folder_path, os.R_OK)
+        logger.debug("This folder is accessible: %s", folder_path)
     except (FileExistsError, PermissionError):
+        logger.error("There was an error accessing the folder: %s", folder_path)
         return False
     return True
 
@@ -226,9 +235,28 @@ def write_dict_to_csv(data, csv_filename):
                     'Location': file_info['location']
                 })
 
-
-
 if __name__ == "__main__":
+
+    ##############################
+    ## Logging configuration
+    # Get the current date and time
+    current_date = datetime.datetime.now()
+
+    # Format the date as a string (e.g., '2023-03-15')
+    formatted_date = current_date.strftime('%Y-%m-%d')
+
+    # Specify a file for logging that includes current date
+    logFile=(f'output/log_{formatted_date}.log')
+
+    # Configure the logging system
+    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    # Create a logger and sets 
+    logger = logging.getLogger('my_logger')
+    logger.setLevel(log_Level)
+
+    ## Logging configuration
+    ##############################
     
     os.system("clear")
 
