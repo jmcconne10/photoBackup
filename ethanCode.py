@@ -208,6 +208,25 @@ def confirm_duplicates(duplicate_dict: dict):
 
     return duplicate_list, overall_dict
 
+def write_dict_to_csv(data, csv_filename):
+    with open(csv_filename, 'w', newline='') as csvfile:
+        fieldnames = ['Filename', 'Status', 'Hash', 'Location']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        # Write the header row
+        writer.writeheader()
+
+        # Iterate through the dictionary and write each row
+        for filename, file_data in data.items():
+            for file_info in file_data:
+                writer.writerow({
+                    'Filename': filename,
+                    'Status': file_info['Status'],
+                    'Hash': file_info['hash'],
+                    'Location': file_info['location']
+                })
+
+
 
 if __name__ == "__main__":
     
@@ -217,5 +236,5 @@ if __name__ == "__main__":
 
     final_output, overall_dict = confirm_duplicates(file_dict)
 
-    pprint.pprint(overall_dict)
+    write_dict_to_csv(overall_dict, hash_csv)
 
