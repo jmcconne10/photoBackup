@@ -27,7 +27,7 @@ exclude_extensions = []  # Add any file extensions you want to exclude
 # Specify the output file
 hash_csv = 'output/ethan_output.csv'
 
-EXCLUDED_FILE_TYPES = ("DS_Store", "localized", "zip", "json","zip", "theatre", "imovielibrary", "ini", "db")
+EXCLUDED_FILE_TYPES = ("DS_Store", "localized", "zip", "json","zip", "theatre", "imovielibrary", "ini", "db", ".DS_Store")
 
 
 def is_accessible(folder_path: str) -> bool:
@@ -37,7 +37,6 @@ def is_accessible(folder_path: str) -> bool:
 
     try:
         os.access(folder_path, os.R_OK)
-        logger.debug("This folder is accessible: %s", folder_path)
     except (FileExistsError, PermissionError):
         logger.error("There was an error accessing the folder: %s", folder_path)
         return False
@@ -79,8 +78,12 @@ def hash_folder_contents(folder_path: str) -> list:
         and get_file_extension(file_name) not in EXCLUDED_FILE_TYPES
     ]
 
-    # Returns a list of hashed file names.
-    return [hash(file_name) for file_name in file_name_list]
+    try:
+        # Returns a list of hashed file names.
+        return [hash(file_name) for file_name in file_name_list]
+    except Exception as e:
+        logger.error("An unexpected error occurred: %s", str(e))
+        return None
 
 
 def create_file_dictionary(hash_list: int, hash_folder_path_list: list) -> dict:
@@ -207,10 +210,12 @@ def confirm_duplicates(duplicate_dict: dict):
         while len(hash_list) > 0:
             if hash_list.count(hash_list[0]) > 1:
                 path_dict = {'location': duplicate_dict[key][0],'hash':hash_list[0], 'Status': 'Duplicate'}
+                logger.debug("File is a duplicate: %s", duplicate_dict[key][0])
                 overall_dict[key].append(path_dict)
                 duplicate_list.append(duplicate_dict[key].pop(0))
             else:
                 path_dict = {'location': duplicate_dict[key][0],'hash':hash_list[0], 'Status': 'Unique'}
+                logger.debug("File is unique: %s", duplicate_dict[key][0])
                 overall_dict[key].append(path_dict)
                 duplicate_dict[key].pop(0)
             hash_list.pop(0)
@@ -237,6 +242,9 @@ def write_dict_to_csv(data, csv_filename):
 
 if __name__ == "__main__":
 
+    # Record start time
+    start_time = time.time()
+    
     ##############################
     ## Logging configuration
     # Get the current date and time
@@ -270,4 +278,22 @@ if __name__ == "__main__":
     final_output, overall_dict = confirm_duplicates(file_dict)
 
     write_dict_to_csv(overall_dict, hash_csv)
+
+    # Record end time
+    end_time = time.time()
+
+    # Calculate elapsed time
+    elapsed_time = end_time - start_time
+    formatted_seconds = "{:.2f}".format(elapsed_time)
+    hours = elapsed_time // 3600
+    minutes = (elapsed_time % 3600) // 60
+    seconds = int (elapsed_time % 60)
+
+    formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
+    print(formatted_time)
+
+    # Print the elapsed time
+    print(f"Elapsed Time: {formatted_seconds} seconds")
+    print(f"Elapsed Time: {formatted_time}")
+
 
