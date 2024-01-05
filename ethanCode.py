@@ -196,6 +196,9 @@ def hash_file(file_path):
 def confirm_duplicates(duplicate_dict: dict):
     duplicate_list = []
     overall_dict = {}
+    total_count = len(duplicate_dict)
+    progress_increment = total_count // 2  # 10% increments
+    current_count = 0
 
     for key in duplicate_dict.keys():
         hash_list = []
@@ -219,6 +222,12 @@ def confirm_duplicates(duplicate_dict: dict):
                 overall_dict[key].append(path_dict)
                 duplicate_dict[key].pop(0)
             hash_list.pop(0)
+        
+                # Update the progress
+        current_count += 1
+        if (current_count % progress_increment == 0) or (current_count / total_count == 1):
+            percentage_completion = (current_count / total_count) * 100
+            print(f"Progress: {percentage_completion:.0f}%")
 
     return duplicate_list, overall_dict
 
@@ -296,4 +305,9 @@ if __name__ == "__main__":
     print(f"Elapsed Time: {formatted_seconds} seconds")
     print(f"Elapsed Time: {formatted_time}")
 
+    logger.info("***************************")
+    logger.info("Ethan's Duplicate File Finder, completed on: %s", current_date)
+    logger.info("Elapsed Time: %s seconds", elapsed_time)
+    logger.info("Elapsed Time: %s", formatted_time)
+    logger.info("***************************")
 
