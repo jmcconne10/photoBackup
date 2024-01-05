@@ -22,12 +22,12 @@ root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
 #root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
-exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
+exclude_extensions = []  # Add any file extensions you want to exclude
 
 # Specify the output file
 hash_csv = 'output/ethan_output.csv'
 
-EXCLUDED_FILE_TYPES = ("DS_Store", "localized", "zip")
+EXCLUDED_FILE_TYPES = ("DS_Store", "localized", "zip", "json","zip", "theatre", "imovielibrary", "ini", "db")
 
 
 def is_accessible(folder_path: str) -> bool:
@@ -57,7 +57,7 @@ def get_file_extension(file_name):
             break
         else:
             extension = file_name[-iterator] + extension
-
+        
     return extension
 
 
@@ -258,6 +258,11 @@ if __name__ == "__main__":
     ## Logging configuration
     ##############################
     
+    logger.info("***************************")
+    logger.info("Ethan's Duplicate File Finder, began on: %s", current_date)
+    logger.info("These extensions are excluded: %s", EXCLUDED_FILE_TYPES)
+    logger.info("***************************")
+
     os.system("clear")
 
     file_dict = scan_folder(root_directory)
