@@ -18,8 +18,8 @@ import pprint
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "DEBUG" # DEBUG is everything, INFO is less
-root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
-#root_directory = "/Volumes/Video/Google Takeout"
+#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = []  # Add any file extensions you want to exclude
@@ -37,6 +37,7 @@ def is_accessible(folder_path: str) -> bool:
 
     try:
         os.access(folder_path, os.R_OK)
+        logger.debug("This folder is acceptable: %s", folder_path)
     except (FileExistsError, PermissionError):
         logger.error("There was an error accessing the folder: %s", folder_path)
         return False
@@ -68,7 +69,9 @@ def hash_folder_contents(folder_path: str) -> list:
 
     # Checks if the folder is even accessible.
     if not is_accessible(folder_path):
-        return None
+       return None
+    
+    logger.debug("This folder is being hashed: %s", folder_path)
 
     # Creates a list of every file that's type isn't excluded.
     file_name_list = [
@@ -137,6 +140,7 @@ def scan_folder(root_path: str) -> dict:
         hash_folder_contents(folder_path) for folder_path in folder_path_list
     ]
 
+
     # Removes any empty or unaccessible folders from the lists.
     index = 0
     while index < len(folder_path_list):
@@ -197,7 +201,7 @@ def confirm_duplicates(duplicate_dict: dict):
     duplicate_list = []
     overall_dict = {}
     total_count = len(duplicate_dict)
-    progress_increment = total_count // 2  # 10% increments
+    progress_increment = total_count // 100  # 10% increments
     current_count = 0
 
     for key in duplicate_dict.keys():

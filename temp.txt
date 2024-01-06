@@ -1,0 +1,10 @@
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/TakeoutLatest/Google Photos/Photos from 2016/IMG_0288.JPG
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout 55/Google Photos/Photos from 2016/file10.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/TakeoutLatest/Google Photos/Photos from 2016/file10.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout 55/Google Photos/Photos from 2016/file9.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/TakeoutLatest/Google Photos/Photos from 2016/file9.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout/Google Photos/Photos from 2015/file7.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout 55/Google Photos/Photos from 2015/file7.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout 55/Google Photos/Photos from 2015/file6.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout/Google Photos/Photos from 2014/file1.txt
+Unique found: /Users/Joe/OneDrive/Code/photoBackup/googleTest/Takeout 55/Google Photos/Photos from 2014/file1.txt
