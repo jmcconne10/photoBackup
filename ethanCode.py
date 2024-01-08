@@ -18,8 +18,8 @@ import pprint
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "DEBUG" # DEBUG is everything, INFO is less
-#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
-root_directory = "/Volumes/Video/Google Takeout"
+root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+#root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = []  # Add any file extensions you want to exclude
@@ -229,9 +229,13 @@ def confirm_duplicates(duplicate_dict: dict):
         
                 # Update the progress
         current_count += 1
-        if (current_count % progress_increment == 0) or (current_count / total_count == 1):
-            percentage_completion = (current_count / total_count) * 100
-            print(f"Progress: {percentage_completion:.0f}%")
+        try: 
+            if (current_count % progress_increment == 0) or (current_count / total_count == 1):
+                percentage_completion = (current_count / total_count) * 100
+                print(f"Progress: {percentage_completion:.0f}%")
+        except ZeroDivisionError:
+            logger.error("Too few files for progress updates. ZeroDivisionError")
+            pass
 
     return duplicate_list, overall_dict
 
