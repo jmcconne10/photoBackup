@@ -18,8 +18,8 @@ import pprint
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "DEBUG" # DEBUG is everything, INFO is less
-root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
-#root_directory = "/Volumes/Video/Google Takeout"
+#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = []  # Add any file extensions you want to exclude
@@ -69,9 +69,8 @@ def hash_folder_contents(folder_path: str) -> list:
 
     # Checks if the folder is even accessible.
     if not is_accessible(folder_path):
+       logger.error("Folder not accessible: %s", folder_path)
        return None
-    
-    logger.debug("This folder is being hashed: %s", folder_path)
 
     # Creates a list of every file that's type isn't excluded.
     file_name_list = [
@@ -82,8 +81,16 @@ def hash_folder_contents(folder_path: str) -> list:
     ]
 
     try:
+
+        logger.info("Hashing files in folder: %s", folder_path)
         # Returns a list of hashed file names.
-        return [hash(file_name) for file_name in file_name_list]
+        hashed_list = []
+        for file_name in file_name_list:
+            hashed_value = hash(file_name)
+            hashed_list.append(hashed_value)
+            logger.debug(f"File: {file_name}, Hash: {hashed_value}")
+        logger.debug("Finished hashing files in folder: %s", folder_path)
+        return hashed_list
     except Exception as e:
         logger.error("An unexpected error occurred: %s", str(e))
         return None
@@ -134,12 +141,13 @@ def scan_folder(root_path: str) -> dict:
     if not is_accessible(root_path):
         raise ValueError(f"{root_path} could not be accessed.", end="\n\n")
 
+    logger.debug("Started scanning folder: %s", root_path)
     # Folder paths and a list of the hashes in that folder.
     folder_path_list = [dirpath for dirpath, dirnames, filenames in os.walk(root_path)]
     folder_hash_list = [
         hash_folder_contents(folder_path) for folder_path in folder_path_list
     ]
-
+    logger.info("Finished scanning folder: %s", root_path)
 
     # Removes any empty or unaccessible folders from the lists.
     index = 0
@@ -290,6 +298,7 @@ if __name__ == "__main__":
 
     os.system("clear")
 
+    logger.info("File Identification started:")
     file_dict = scan_folder(root_directory)
 
     final_output, overall_dict = confirm_duplicates(file_dict)
