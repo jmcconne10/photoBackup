@@ -170,8 +170,10 @@ def scan_folder(root_path: str) -> dict:
 
     # Calculate elapsed time
     elapsed_hash_time = end_hash_time - start_hash_time
+    formatted_seconds = "{:.2f}".format(elapsed_hash_time)
+    print(f"Elapsed Time for hashing file names: {formatted_seconds} seconds")
 
-    print(f"Elapsed Time for hashing file names: {elapsed_hash_time} seconds")
+    
     ############### End
 
     #print("Folder Path List:")
@@ -226,8 +228,8 @@ def scan_folder(root_path: str) -> dict:
     elapsed_compare_time = end_compare_time - start_compare_time
     
     new_dict, time_spent = create_file_dictionary(duplicate_hash_list, duplicate_hash_path_list)
-
-    print(f"Elapsed Time for creating duplicate d\ictionary: {time_spent} seconds")
+    formatted_seconds = "{:.2f}".format(time_spent)
+    print(f"Elapsed Time for creating duplicate dictionary: {formatted_seconds} seconds")
     return new_dict
 
 
@@ -350,10 +352,13 @@ if __name__ == "__main__":
     file_dict = scan_folder(root_directory)
     end_function_time = time.time()
     elapsed_function_time = end_function_time - start_function_time
-    print(f"Scan and identify duplicates Elapsed Time: {elapsed_function_time} seconds")
+    formatted_seconds = "{:.2f}".format(elapsed_function_time)
+    print(f"Elapsed Time scan and identify duplicates: {formatted_seconds} seconds")
+    
 
     final_output, overall_dict, time_spent = confirm_duplicates(file_dict)
-    print(f"Hashing files and identify duplicates Elapsed Time: {time_spent} seconds")
+    formatted_seconds = "{:.2f}".format(time_spent)
+    print(f"Hashing files and identify duplicates Elapsed Time: {formatted_seconds} seconds")
 
     write_dict_to_csv(overall_dict, hash_csv)
 
