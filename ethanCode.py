@@ -19,7 +19,8 @@ import pprint
 # Identifies root folder and gets a list of all files
 log_Level = "DEBUG" # DEBUG is everything, INFO is less
 #root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
-root_directory = "/Volumes/Video/Google Takeout"
+root_directory = "/Volumes/Video/DuplicateTest"
+#root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = []  # Add any file extensions you want to exclude
@@ -101,6 +102,9 @@ def create_file_dictionary(hash_list: int, hash_folder_path_list: list) -> dict:
     Returns a dictionary of file names and their locations.
     """
 
+    ############# Start timer for hashing file names
+    start_function_time = time.time()
+
     file_dict = dict()
 
     for iterator in range(len(hash_list)):
@@ -128,7 +132,15 @@ def create_file_dictionary(hash_list: int, hash_folder_path_list: list) -> dict:
 
         file_dict[hash_file_name] = hash_file_paths
 
-    return file_dict
+    ############## End timer for hashing file names
+    end_function_time = time.time()
+
+    # Calculate elapsed time
+    elapsed_function_time = end_function_time - start_function_time
+    
+    #print("file_dict")
+    #pprint.pprint(file_dict)
+    return file_dict, elapsed_function_time
 
 
 def scan_folder(root_path: str) -> dict:
@@ -144,9 +156,29 @@ def scan_folder(root_path: str) -> dict:
     logger.debug("Started scanning folder: %s", root_path)
     # Folder paths and a list of the hashes in that folder.
     folder_path_list = [dirpath for dirpath, dirnames, filenames in os.walk(root_path)]
+    
+    ############### Start
+    # Record start time
+    start_hash_time = time.time()
+
     folder_hash_list = [
         hash_folder_contents(folder_path) for folder_path in folder_path_list
     ]
+
+    
+    end_hash_time = time.time()
+
+    # Calculate elapsed time
+    elapsed_hash_time = end_hash_time - start_hash_time
+
+    print(f"Elapsed Time for hashing file names: {elapsed_hash_time} seconds")
+    ############### End
+
+    #print("Folder Path List:")
+    #pprint.pprint(folder_path_list)
+
+    #print("Folder Hash List:")
+    #pprint.pprint(folder_hash_list)
     logger.info("Finished scanning folder: %s", root_path)
 
     # Removes any empty or unaccessible folders from the lists.
@@ -166,6 +198,8 @@ def scan_folder(root_path: str) -> dict:
     Gets every hash from a folder and compares it to the hashes of other folders.
     Stores the value and folder paths of hashes with multiple instances.
     """
+
+    start_compare_time = time.time()
     while len(folder_path_list) > 1:
         # Pops the first folder from the main path and hash list.
         temp_hash_list = folder_hash_list.pop(0)
@@ -187,8 +221,14 @@ def scan_folder(root_path: str) -> dict:
                 duplicate_hash_list.append(hash)
                 temp_duplicate_hash_path_list.append(temp_folder_name)
                 duplicate_hash_path_list.append(temp_duplicate_hash_path_list)
+    end_compare_time = time.time()
 
-    return create_file_dictionary(duplicate_hash_list, duplicate_hash_path_list)
+    elapsed_compare_time = end_compare_time - start_compare_time
+    
+    new_dict, time_spent = create_file_dictionary(duplicate_hash_list, duplicate_hash_path_list)
+
+    print(f"Elapsed Time for creating duplicate d\ictionary: {time_spent} seconds")
+    return new_dict
 
 
 def hash_file(file_path):
@@ -211,6 +251,9 @@ def confirm_duplicates(duplicate_dict: dict):
     total_count = len(duplicate_dict)
     progress_increment = total_count // 100  # 10% increments
     current_count = 0
+
+
+    start_function_time = time.time()
 
     for key in duplicate_dict.keys():
         hash_list = []
@@ -245,7 +288,10 @@ def confirm_duplicates(duplicate_dict: dict):
             logger.error("Too few files for progress updates. ZeroDivisionError")
             pass
 
-    return duplicate_list, overall_dict
+    end_function_time = time.time()
+    elapsed_function_time = end_function_time - start_function_time
+
+    return duplicate_list, overall_dict, elapsed_function_time
 
 def write_dict_to_csv(data, csv_filename):
     with open(csv_filename, 'w', newline='') as csvfile:
@@ -267,6 +313,8 @@ def write_dict_to_csv(data, csv_filename):
 
 if __name__ == "__main__":
 
+
+    print("**********************")
     # Record start time
     start_time = time.time()
     
@@ -296,12 +344,16 @@ if __name__ == "__main__":
     logger.info("These extensions are excluded: %s", EXCLUDED_FILE_TYPES)
     logger.info("***************************")
 
-    os.system("clear")
-
     logger.info("File Identification started:")
-    file_dict = scan_folder(root_directory)
 
-    final_output, overall_dict = confirm_duplicates(file_dict)
+    start_function_time = time.time()
+    file_dict = scan_folder(root_directory)
+    end_function_time = time.time()
+    elapsed_function_time = end_function_time - start_function_time
+    print(f"Scan and identify duplicates Elapsed Time: {elapsed_function_time} seconds")
+
+    final_output, overall_dict, time_spent = confirm_duplicates(file_dict)
+    print(f"Hashing files and identify duplicates Elapsed Time: {time_spent} seconds")
 
     write_dict_to_csv(overall_dict, hash_csv)
 
