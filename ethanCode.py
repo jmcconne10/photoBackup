@@ -4,6 +4,8 @@
 ## Review the exclude_extensions capability
 ## Add in the method to track % complete
 
+from pycallgraph2 import PyCallGraph
+from pycallgraph2.output import GraphvizOutput
 
 import hashlib
 import os
@@ -315,73 +317,78 @@ def write_dict_to_csv(data, csv_filename):
 
 if __name__ == "__main__":
 
+    # Configure pycallgraph
+    graphviz = GraphvizOutput()
+    graphviz.output_file = 'function_call_graph.png'
 
-    print("**********************")
-    # Record start time
-    start_time = time.time()
-    
-    ##############################
-    ## Logging configuration
-    # Get the current date and time
-    current_date = datetime.datetime.now()
+    with PyCallGraph(output=graphviz):
 
-    # Format the date as a string (e.g., '2023-03-15')
-    formatted_date = current_date.strftime('%Y-%m-%d')
+        print("**********************")
+        # Record start time
+        start_time = time.time()
+        
+        ##############################
+        ## Logging configuration
+        # Get the current date and time
+        current_date = datetime.datetime.now()
 
-    # Specify a file for logging that includes current date
-    logFile=(f'output/log_{formatted_date}.log')
+        # Format the date as a string (e.g., '2023-03-15')
+        formatted_date = current_date.strftime('%Y-%m-%d')
 
-    # Configure the logging system
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
+        # Specify a file for logging that includes current date
+        logFile=(f'output/log_{formatted_date}.log')
 
-    # Create a logger and sets 
-    logger = logging.getLogger('my_logger')
-    logger.setLevel(log_Level)
+        # Configure the logging system
+        logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    ## Logging configuration
-    ##############################
-    
-    logger.info("***************************")
-    logger.info("Ethan's Duplicate File Finder, began on: %s", current_date)
-    logger.info("These extensions are excluded: %s", EXCLUDED_FILE_TYPES)
-    logger.info("***************************")
+        # Create a logger and sets 
+        logger = logging.getLogger('my_logger')
+        logger.setLevel(log_Level)
 
-    logger.info("File Identification started:")
+        ## Logging configuration
+        ##############################
+        
+        logger.info("***************************")
+        logger.info("Ethan's Duplicate File Finder, began on: %s", current_date)
+        logger.info("These extensions are excluded: %s", EXCLUDED_FILE_TYPES)
+        logger.info("***************************")
 
-    start_function_time = time.time()
-    file_dict = scan_folder(root_directory)
-    end_function_time = time.time()
-    elapsed_function_time = end_function_time - start_function_time
-    formatted_seconds = "{:.2f}".format(elapsed_function_time)
-    print(f"Elapsed Time scan and identify duplicates: {formatted_seconds} seconds")
-    
+        logger.info("File Identification started:")
 
-    final_output, overall_dict, time_spent = confirm_duplicates(file_dict)
-    formatted_seconds = "{:.2f}".format(time_spent)
-    print(f"Hashing files and identify duplicates Elapsed Time: {formatted_seconds} seconds")
+        start_function_time = time.time()
+        file_dict = scan_folder(root_directory)
+        end_function_time = time.time()
+        elapsed_function_time = end_function_time - start_function_time
+        formatted_seconds = "{:.2f}".format(elapsed_function_time)
+        print(f"Elapsed Time scan and identify duplicates: {formatted_seconds} seconds")
+        
 
-    write_dict_to_csv(overall_dict, hash_csv)
+        final_output, overall_dict, time_spent = confirm_duplicates(file_dict)
+        formatted_seconds = "{:.2f}".format(time_spent)
+        print(f"Hashing files and identify duplicates Elapsed Time: {formatted_seconds} seconds")
 
-    # Record end time
-    end_time = time.time()
+        write_dict_to_csv(overall_dict, hash_csv)
 
-    # Calculate elapsed time
-    elapsed_time = end_time - start_time
-    formatted_seconds = "{:.2f}".format(elapsed_time)
-    hours = elapsed_time // 3600
-    minutes = (elapsed_time % 3600) // 60
-    seconds = int (elapsed_time % 60)
+        # Record end time
+        end_time = time.time()
 
-    formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
-    print(formatted_time)
+        # Calculate elapsed time
+        elapsed_time = end_time - start_time
+        formatted_seconds = "{:.2f}".format(elapsed_time)
+        hours = elapsed_time // 3600
+        minutes = (elapsed_time % 3600) // 60
+        seconds = int (elapsed_time % 60)
 
-    # Print the elapsed time
-    print(f"Elapsed Time: {formatted_seconds} seconds")
-    print(f"Elapsed Time: {formatted_time}")
+        formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
+        print(formatted_time)
 
-    logger.info("***************************")
-    logger.info("Ethan's Duplicate File Finder, completed on: %s", current_date)
-    logger.info("Elapsed Time: %s seconds", elapsed_time)
-    logger.info("Elapsed Time: %s", formatted_time)
-    logger.info("***************************")
+        # Print the elapsed time
+        print(f"Elapsed Time: {formatted_seconds} seconds")
+        print(f"Elapsed Time: {formatted_time}")
+
+        logger.info("***************************")
+        logger.info("Ethan's Duplicate File Finder, completed on: %s", current_date)
+        logger.info("Elapsed Time: %s seconds", elapsed_time)
+        logger.info("Elapsed Time: %s", formatted_time)
+        logger.info("***************************")
 
