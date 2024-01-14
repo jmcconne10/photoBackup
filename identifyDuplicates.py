@@ -3,6 +3,10 @@
 # In this one, I want to have the folder names in the csv file
 # Need to remove files that include iMovie
 
+from pycallgraph2 import PyCallGraph
+from pycallgraph2.output import GraphvizOutput
+from pycallgraph2 import GlobbingFilter
+from pycallgraph2 import Config
 
 import hashlib
 import os
@@ -14,11 +18,19 @@ import datetime
 import logging
 import pprint
 
+config = Config()
+## Setting filter for Call Graph
+config.trace_filter = GlobbingFilter(exclude=[
+    'logging.*',
+    'pycallgraph2.*',
+])
+
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "INFO" # DEBUG is everything, INFO is less
 #root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
-root_directory = "/Volumes/Video/Google Takeout"
+#root_directory = "/Volumes/Video/Google Takeout"
+root_directory = "/Volumes/Video/DuplicateTest"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -169,80 +181,85 @@ def write_duplicate_files(data, csv_file_path):
                 if (entry['Duplicate'] == True):
                     writer.writerow({'filename': filename, 'location': entry['location'], 'hash': entry['hash'], 'Duplicate': entry['Duplicate'], 'size': entry['size'], 'Plan': entry['Plan']})
 
+if __name__ == "__main__":
+    # Configure pycallgraph
+    graphviz = GraphvizOutput()
+    graphviz.output_file = 'output/function_call_graph.png'
+    with PyCallGraph(output=graphviz, config=config):
 
-# Get the current date and time
-current_date = datetime.datetime.now()
+        # Get the current date and time
+        current_date = datetime.datetime.now()
 
-# Format the date as a string (e.g., '2023-03-15')
-formatted_date = current_date.strftime('%Y-%m-%d')
+        # Format the date as a string (e.g., '2023-03-15')
+        formatted_date = current_date.strftime('%Y-%m-%d')
 
-# Specify a file for logging that includes current date
-logFile=(f'output/log_{formatted_date}.log')
+        # Specify a file for logging that includes current date
+        logFile=(f'output/log_{formatted_date}.log')
 
-# Configure the logging system
-logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
+        # Configure the logging system
+        logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Create a logger and sets 
-logger = logging.getLogger('my_logger')
-logger.setLevel(log_Level)
+        # Create a logger and sets 
+        logger = logging.getLogger('my_logger')
+        logger.setLevel(log_Level)
 
-# Record start time
-start_time = time.time()
+        # Record start time
+        start_time = time.time()
 
-# Start the logging
-logger.info("**************************************************************")
-logger.info("Duplicate Identification Started")
-logger.info("Root Directory: %s", root_directory)
-logger.info("Exclude Files: %s", exclude_files)
-logger.info("Exclude Extensions: %s", exclude_extensions)
-logger.info("**************************************************************")
+        # Start the logging
+        logger.info("**************************************************************")
+        logger.info("Duplicate Identification Started")
+        logger.info("Root Directory: %s", root_directory)
+        logger.info("Exclude Files: %s", exclude_files)
+        logger.info("Exclude Extensions: %s", exclude_extensions)
+        logger.info("**************************************************************")
 
-# Get a list of all files in the root directory
-all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
+        # Get a list of all files in the root directory
+        all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
 
-logger.info("Total Number of Files Found: %s", len(all_files_list))
+        logger.info("Total Number of Files Found: %s", len(all_files_list))
 
-# Identify duplicate file names and their locations
-duplicate_files = identify_duplicate_files(all_files_list)
+        # Identify duplicate file names and their locations
+        duplicate_files = identify_duplicate_files(all_files_list)
 
-logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
+        logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
 
-# Hashes the files, stores the results in a dictionary, and keeps track of % completed
-hashed_files = hash_duplicates(duplicate_files)
-duplicateCount, mismatchCount, deletedFiles = check_duplicate_hash(hashed_files)
+        # Hashes the files, stores the results in a dictionary, and keeps track of % completed
+        hashed_files = hash_duplicates(duplicate_files)
+        duplicateCount, mismatchCount, deletedFiles = check_duplicate_hash(hashed_files)
 
-# Get the size of the files
-get_file_size(hashed_files)
+        # Get the size of the files
+        get_file_size(hashed_files)
 
-#pprint.pprint(hashed_files)
+        #pprint.pprint(hashed_files)
 
-# Write the output showing which duplicate file names have the same has
-write_duplicate_files(hashed_files, hash_csv)
+        # Write the output showing which duplicate file names have the same has
+        write_duplicate_files(hashed_files, hash_csv)
 
-# Record end time
-end_time = time.time()
+        # Record end time
+        end_time = time.time()
 
-# Calculate elapsed time
-elapsed_time = end_time - start_time
-hours = elapsed_time // 3600
-minutes = (elapsed_time % 3600) // 60
-seconds = (elapsed_time % 60)
+        # Calculate elapsed time
+        elapsed_time = end_time - start_time
+        hours = elapsed_time // 3600
+        minutes = (elapsed_time % 3600) // 60
+        seconds = (elapsed_time % 60)
 
-formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
-print(formatted_time)
+        formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
+        print(formatted_time)
 
-# Print the elapsed time
-print(f"Elapsed Time: {elapsed_time} seconds")
-print(f"Elapsed Time: {formatted_time}")
+        # Print the elapsed time
+        print(f"Elapsed Time: {elapsed_time} seconds")
+        print(f"Elapsed Time: {formatted_time}")
 
-#use logger to track how many duplicates were found and how long it took
-logger.info("**************************************************************")
-logger.info("Duplicate Identification Completed")
-logger.info("Total Number of Files Found: %s", len(all_files_list))
-logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
-logger.info("Number of Duplicate Hash Values Found: %s", duplicateCount)
-logger.info("Number of Deleted Files: %s", deletedFiles)
-logger.info("Number of Mismatched Hash Values Found: %s", mismatchCount)
-logger.info("Elapsed Time: %s seconds", elapsed_time)
-logger.info("Elapsed Time: %s seconds", formatted_time)
-logger.info("**************************************************************")
+        #use logger to track how many duplicates were found and how long it took
+        logger.info("**************************************************************")
+        logger.info("Duplicate Identification Completed")
+        logger.info("Total Number of Files Found: %s", len(all_files_list))
+        logger.info("Number of Duplicate File Names Found: %s", len(duplicate_files))
+        logger.info("Number of Duplicate Hash Values Found: %s", duplicateCount)
+        logger.info("Number of Deleted Files: %s", deletedFiles)
+        logger.info("Number of Mismatched Hash Values Found: %s", mismatchCount)
+        logger.info("Elapsed Time: %s seconds", elapsed_time)
+        logger.info("Elapsed Time: %s seconds", formatted_time)
+        logger.info("**************************************************************")
