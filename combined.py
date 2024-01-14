@@ -29,8 +29,8 @@ config.trace_filter = GlobbingFilter(exclude=[
 # Identifies root folder and gets a list of all files
 log_Level = "INFO" # DEBUG is everything, INFO is less
 #root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
-root_directory = "/Volumes/Video/DuplicateTest"
-#root_directory = "/Volumes/Video/Google Takeout"
+#root_directory = "/Volumes/Video/DuplicateTest"
+root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -118,6 +118,16 @@ def hash_file(file_path):
 
     return file_hash.hexdigest()
 
+def get_file_size(hashed_files):
+    for filename, entries in hashed_files.items():
+        for entry in entries:
+            try:
+                bytes = os.path.getsize(entry['location'])
+                # Convert bytes to megabytes and format to 2 decimal places
+                mb = round(bytes / (1024 * 1024), 2)
+                entry['size'] = mb
+            except FileNotFoundError:
+                entry['size'] = 'File not found'
 
 def write_dict_to_csv(data, csv_filename):
     with open(csv_filename, 'w', newline='') as csvfile:
@@ -188,6 +198,9 @@ if __name__ == "__main__":
         final_output, overall_dict, time_spent = confirm_duplicates(duplicate_files)
         formatted_seconds = "{:.2f}".format(time_spent)
         print(f"Hashing files and identify duplicates Elapsed Time: {formatted_seconds} seconds")
+
+        # Get the size of the files
+        #get_file_size(overall_dict)
 
         write_dict_to_csv(overall_dict, hash_csv)
 
