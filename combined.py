@@ -29,13 +29,13 @@ config.trace_filter = GlobbingFilter(exclude=[
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "INFO" # DEBUG is everything, INFO is less
-root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
 #root_directory = "/Volumes/Video/DuplicateTest"
-#root_directory = "/Volumes/Video/Google Takeout"
+root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 
 # Specify the base path you want to replace
-duplicates_path = "/Volumes/Video/DuplicatesFound"
+duplicates_path = "/Volumes/Video/Google Takeout/DuplicatesFound"
 
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -59,18 +59,24 @@ def identify_duplicate_files(file_list):
     start_function_time = time.time()
 
     #Setting a counter
-    i = 0
+    counter = 0
+    duplicate_files = {}
 
     file_locations = defaultdict(list)
     for file_path in file_list:
         file_name = os.path.basename(file_path)
         file_locations[file_name].append(file_path)
-    duplicate_files = {name: locations for name, locations in file_locations.items() if len(locations) > 1}
+    
+    for name, locations in file_locations.items():
+        if len(locations) > 1:
+            duplicate_files[name] = locations
+            counter += 1
 
     end_function_time = time.time()
     elapsed_function_time = end_function_time - start_function_time
+    formatted_seconds = "{:.2f}".format(elapsed_function_time)
 
-    return duplicate_files
+    return duplicate_files, counter, formatted_seconds
 
 def confirm_duplicates(duplicate_dict: dict):
     duplicate_list = []
@@ -78,7 +84,7 @@ def confirm_duplicates(duplicate_dict: dict):
     total_count = len(duplicate_dict)
     progress_increment = total_count // 100  # 10% increments
     current_count = 0
-
+    duplicate_count = 0
 
     start_function_time = time.time()
 
@@ -100,6 +106,9 @@ def confirm_duplicates(duplicate_dict: dict):
                 #Move the file
                 move_duplicate(duplicate_dict[key][0])
 
+                #count number of duplicates
+                duplicate_count += 1 
+
                 overall_dict[key].append(path_dict)
                 duplicate_list.append(duplicate_dict[key].pop(0))
 
@@ -117,13 +126,14 @@ def confirm_duplicates(duplicate_dict: dict):
                 percentage_completion = (current_count / total_count) * 100
                 print(f"Progress: {percentage_completion:.0f}%")
         except ZeroDivisionError:
-            logger.error("Too few files for progress updates. ZeroDivisionError")
+            logger.debug("Too few files for progress updates. ZeroDivisionError")
             pass
 
     end_function_time = time.time()
     elapsed_function_time = end_function_time - start_function_time
+    formatted_seconds = "{:.2f}".format(elapsed_function_time)
 
-    return duplicate_list, overall_dict, elapsed_function_time
+    return duplicate_list, overall_dict, duplicate_count, formatted_seconds
 
 def hash_file(file_path):
     """
@@ -182,7 +192,7 @@ def move_duplicate(file):
         # Move the file
         shutil.move(file, new_path)
         success_message = f"File '{file}' moved to {duplicates_path} successfully."
-        logger.error(success_message)
+        logger.info(success_message)
         print(success_message)
 
     except Exception as e:
@@ -194,6 +204,7 @@ if __name__ == "__main__":
     # Configure pycallgraph
     graphviz = GraphvizOutput()
     graphviz.output_file = 'output/combine_function_call_graph.png'
+
     with PyCallGraph(output=graphviz, config=config):
 
         # Get the current date and time
@@ -227,18 +238,13 @@ if __name__ == "__main__":
         all_files_list = get_all_files(root_directory, exclude_files, exclude_extensions)
 
         # Identify duplicate file names and their locations
-        duplicate_files = identify_duplicate_files(all_files_list)
+        duplicate_files, duplicateFileNameCount, duplicateTime = identify_duplicate_files(all_files_list)
 
-        end_function_time = time.time()
-        elapsed_function_time = end_function_time - start_time
-        formatted_seconds = "{:.2f}".format(elapsed_function_time)
-        print(f"Elapsed Time scan and identify duplicates: {formatted_seconds} seconds")
-        
 
-        final_output, overall_dict, time_spent = confirm_duplicates(duplicate_files)
-        formatted_seconds = "{:.2f}".format(time_spent)
-        print(f"Hashing files and identify duplicates Elapsed Time: {formatted_seconds} seconds")
+        # Identify duplicate file names that have a duplicate hash and move the duplcates away
+        final_output, overall_dict, duplicateFileCount, hashTime = confirm_duplicates(duplicate_files)
 
+        # Track everything in csv
         write_dict_to_csv(overall_dict, hash_csv)
 
         # Record end time
@@ -252,15 +258,21 @@ if __name__ == "__main__":
         seconds = int (elapsed_time % 60)
 
         formatted_time = f"{hours} hours, {minutes} minutes, {seconds} seconds"
-        print(formatted_time)
 
         # Print the elapsed time
+        print(f"Hashing files and identify duplicates Elapsed Time: {hashTime} seconds")
+        print(f"Elapsed Time scan and identify duplicates: {duplicateTime} seconds")
+        print(f"Number of duplicate file names found: {duplicateFileNameCount}")
+        print(f"Number of duplicate files found: {duplicateFileCount}")
         print(f"Elapsed Time: {formatted_seconds} seconds")
         print(f"Elapsed Time: {formatted_time}")
 
         logger.info("***************************")
         logger.info("Duplicate File Finder, completed on: %s", current_date)
         logger.info("Total Number of Files Found: %s", len(all_files_list))
+        logger.info("Duplicate File Names Found: %s", duplicateFileNameCount)
+        logger.info("Duplicate Files Found: %s", duplicateFileCount)
+        logger.info("Identifying Duplicates took %s seconds", hashTime)
         logger.info("Elapsed Time: %s seconds", elapsed_time)
         logger.info("Elapsed Time: %s", formatted_time)
         logger.info("***************************")
