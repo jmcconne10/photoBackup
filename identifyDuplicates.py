@@ -28,7 +28,8 @@ config.trace_filter = GlobbingFilter(exclude=[
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "INFO" # DEBUG is everything, INFO is less
-root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+root_directory = "/Volumes/Video/DuplicateTest"
 #root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
@@ -183,7 +184,7 @@ def write_duplicate_files(data, csv_file_path):
 if __name__ == "__main__":
     # Configure pycallgraph
     graphviz = GraphvizOutput()
-    graphviz.output_file = 'output/function_call_graph.png'
+    graphviz.output_file = 'output/Joe_function_call_graph.png'
     with PyCallGraph(output=graphviz, config=config):
 
         # Get the current date and time

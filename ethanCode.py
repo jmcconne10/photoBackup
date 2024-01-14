@@ -328,7 +328,7 @@ if __name__ == "__main__":
 
     # Configure pycallgraph
     graphviz = GraphvizOutput()
-    graphviz.output_file = 'output/function_call_graph.png'
+    graphviz.output_file = 'output/Ethan_function_call_graph.png'
 
     with PyCallGraph(output=graphviz, config=config):
 
