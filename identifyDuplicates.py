@@ -28,9 +28,8 @@ config.trace_filter = GlobbingFilter(exclude=[
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "INFO" # DEBUG is everything, INFO is less
-#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
 #root_directory = "/Volumes/Video/Google Takeout"
-root_directory = "/Volumes/Video/DuplicateTest"
 #root_directory = "/Volumes/Video"
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -60,7 +59,7 @@ def identify_duplicate_files(file_list):
 def hash_duplicates(duplicate_files):
 
     total_count = len(duplicate_files)
-    progress_increment = total_count // 100  # 10% increments
+    progress_increment = total_count // 1  # 10% increments
     current_count = 0
     hashed_files = {}
             
@@ -230,8 +229,6 @@ if __name__ == "__main__":
 
         # Get the size of the files
         get_file_size(hashed_files)
-
-        #pprint.pprint(hashed_files)
 
         # Write the output showing which duplicate file names have the same has
         write_duplicate_files(hashed_files, hash_csv)
