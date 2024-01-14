@@ -6,6 +6,8 @@
 
 from pycallgraph2 import PyCallGraph
 from pycallgraph2.output import GraphvizOutput
+from pycallgraph2 import GlobbingFilter
+from pycallgraph2 import Config
 
 import hashlib
 import os
@@ -31,6 +33,13 @@ exclude_extensions = []  # Add any file extensions you want to exclude
 hash_csv = 'output/ethan_output.csv'
 
 EXCLUDED_FILE_TYPES = ("DS_Store", "localized", "zip", "json","zip", "theatre", "imovielibrary", "ini", "db", ".DS_Store")
+
+config = Config()
+## Setting filter for Call Graph
+config.trace_filter = GlobbingFilter(exclude=[
+    'logging.*',
+    'pycallgraph2.*',
+])
 
 
 def is_accessible(folder_path: str) -> bool:
@@ -319,9 +328,9 @@ if __name__ == "__main__":
 
     # Configure pycallgraph
     graphviz = GraphvizOutput()
-    graphviz.output_file = 'function_call_graph.png'
+    graphviz.output_file = 'output/function_call_graph.png'
 
-    with PyCallGraph(output=graphviz):
+    with PyCallGraph(output=graphviz, config=config):
 
         print("**********************")
         # Record start time
