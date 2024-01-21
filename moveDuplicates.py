@@ -1,3 +1,6 @@
+## Description:
+# This script identifies copy files and moves them to a duplicates folder
+
 ## TO DO:
 # Add a method to get the file size, so I can ignore smaller files
 

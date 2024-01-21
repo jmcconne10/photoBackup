@@ -1,4 +1,10 @@
-#This is just a start, no testing
+## Description
+# This script is meant to consolidate files into a single folder
+# If the name is a duplicate, it leaves the original file in the folder
+# If the name is not a duplicate, it moves the file to the new folder
+
+## To Do:
+# Instead of moving the file it should be renamed then moved
 
 import os
 import pprint
@@ -29,8 +35,8 @@ def move_files(source_folder, destination_folder):
                     try:
                         # Move the file to the destination
                         shutil.move(source_path, destination_path)
-                        print(f"From: {source_path}")
-                        print(f"To: {destination_path}")
+                        #print(f"From: {source_path}")
+                        #print(f"To: {destination_path}")
                     except shutil.Error as e:
                         print(f"Error: {e}")
 
