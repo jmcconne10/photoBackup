@@ -9,7 +9,6 @@ from pycallgraph2 import Config
 
 import hashlib
 import os
-import shutil
 import csv
 from collections import defaultdict
 import os
@@ -53,6 +52,7 @@ def get_all_files(root_folder, exclude_names=None, exclude_extensions=None):
         if filename not in exclude_names and not filename.endswith(tuple(exclude_extensions))
     ]
 
+
 def identify_duplicate_files(file_list):
 
     start_function_time = time.time()
@@ -76,7 +76,6 @@ def identify_duplicate_files(file_list):
     formatted_seconds = "{:.2f}".format(elapsed_function_time)
 
     return duplicate_files, counter, formatted_seconds
-
 def confirm_duplicates(duplicate_dict: dict):
     duplicate_list = []
     overall_dict = {}
@@ -133,7 +132,6 @@ def confirm_duplicates(duplicate_dict: dict):
     formatted_seconds = "{:.2f}".format(elapsed_function_time)
 
     return duplicate_list, overall_dict, duplicate_count, formatted_seconds
-
 def hash_file(file_path):
     """
     Hashes a file.
@@ -196,6 +194,7 @@ def move_duplicate(file):
     except Exception as e:
         error_message = f"Error moving file '{file}': {str(e)}"
         logger.error(error_message)
+        
 if __name__ == "__main__":
     # Configure pycallgraph
     graphviz = GraphvizOutput()
