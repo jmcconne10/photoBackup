@@ -1,7 +1,6 @@
 ## TO DO:
 # Add a method to get the file size, so I can ignore smaller files
-# In this one, I want to have the folder names in the csv file
-# Need to remove files that include iMovie
+# Remove print statements for moved files and make sure they are logged instead
 
 from pycallgraph2 import PyCallGraph
 from pycallgraph2.output import GraphvizOutput
@@ -35,7 +34,7 @@ root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 
 # Specify the base path you want to replace
-duplicates_path = "/Volumes/Video/Google Takeout/DuplicatesFound"
+duplicates_path = "/Volumes/Video/DuplicatesFound/Google Takeout"
 
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -192,14 +191,11 @@ def move_duplicate(file):
         # Move the file
         shutil.move(file, new_path)
         success_message = f"File '{file}' moved to {duplicates_path} successfully."
-        logger.info(success_message)
-        print(success_message)
+        logger.debug(success_message)
 
     except Exception as e:
         error_message = f"Error moving file '{file}': {str(e)}"
         logger.error(error_message)
-        print(error_message)
-
 if __name__ == "__main__":
     # Configure pycallgraph
     graphviz = GraphvizOutput()
@@ -230,6 +226,7 @@ if __name__ == "__main__":
         logger.info("**************************************************************")
         logger.info("Duplicate File Finder Started")
         logger.info("Root Directory: %s", root_directory)
+        logger.info("Destination for duplicates: %s", duplicates_path)
         logger.info("Exclude Files: %s", exclude_files)
         logger.info("Exclude Extensions: %s", exclude_extensions)
         logger.info("**************************************************************")
