@@ -1,6 +1,5 @@
 ## TO DO:
 # Add a method to get the file size, so I can ignore smaller files
-# Remove print statements for moved files and make sure they are logged instead
 
 from pycallgraph2 import PyCallGraph
 from pycallgraph2.output import GraphvizOutput
@@ -9,6 +8,7 @@ from pycallgraph2 import Config
 
 import hashlib
 import os
+import shutil
 import csv
 from collections import defaultdict
 import os
@@ -27,13 +27,14 @@ config.trace_filter = GlobbingFilter(exclude=[
 ## Attributes that are changed regularly
 # Identifies root folder and gets a list of all files
 log_Level = "INFO" # DEBUG is everything, INFO is less
-#root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
+root_directory = '/Users/Joe/OneDrive/Code/photoBackup/googleTest'
 #root_directory = "/Volumes/Video/DuplicateTest"
-root_directory = "/Volumes/Video/Google Takeout"
+#root_directory = "/Volumes/Video/Google Takeout"
 #root_directory = "/Volumes/Video"
 
 # Specify the base path you want to replace
-duplicates_path = "/Volumes/Video/DuplicatesFound/Google Takeout"
+#duplicates_path = "/Volumes/Video/DuplicatesFound/Google Takeout"
+duplicates_path = "/Users/Joe/OneDrive/Code/photoBackup/googleTest/Duplicates"
 
 exclude_files = ['.DS_Store', 'some_file.txt']  # Add any file names you want to exclude
 exclude_extensions = ['.json','.zip', '.theatre', 'imovielibrary', 'ini', 'db']  # Add any file extensions you want to exclude
@@ -51,7 +52,6 @@ def get_all_files(root_folder, exclude_names=None, exclude_extensions=None):
         for filename in filenames
         if filename not in exclude_names and not filename.endswith(tuple(exclude_extensions))
     ]
-
 
 def identify_duplicate_files(file_list):
 
@@ -76,6 +76,7 @@ def identify_duplicate_files(file_list):
     formatted_seconds = "{:.2f}".format(elapsed_function_time)
 
     return duplicate_files, counter, formatted_seconds
+
 def confirm_duplicates(duplicate_dict: dict):
     duplicate_list = []
     overall_dict = {}
@@ -132,6 +133,7 @@ def confirm_duplicates(duplicate_dict: dict):
     formatted_seconds = "{:.2f}".format(elapsed_function_time)
 
     return duplicate_list, overall_dict, duplicate_count, formatted_seconds
+
 def hash_file(file_path):
     """
     Hashes a file.
@@ -194,7 +196,6 @@ def move_duplicate(file):
     except Exception as e:
         error_message = f"Error moving file '{file}': {str(e)}"
         logger.error(error_message)
-        
 if __name__ == "__main__":
     # Configure pycallgraph
     graphviz = GraphvizOutput()
